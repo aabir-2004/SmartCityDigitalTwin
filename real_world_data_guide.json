@@ -1,0 +1,93 @@
+{
+    "title": "Smart City Digital Twin: Real-World Data Acquisition Guide",
+    "description": "A comprehensive guide outlining the specific real-world datasets needed to transition the Smart City Digital Twin from a simulated demo to a realistic, data-driven application.",
+    "datasets": [
+        {
+            "category": "Traffic & Mobility Data",
+            "purpose": "To drive the real-time and historical 'Avg. Traffic Flow' charts and predictive congestion models.",
+            "requirements": [
+                "Time-Series Traffic Counts: Datasets showing the number of vehicles passing specific intersections or road segments over time (ideally hourly or 15-minute intervals).",
+                "Average Speeds: Data on the average speed of traffic on key city arteries.",
+                "Incident Reports: Logs of traffic accidents, road closures, or construction events with timestamps and coordinates."
+            ],
+            "required_fields": [
+                "Timestamp",
+                "Location/Intersection_ID",
+                "Vehicle_Count",
+                "Average_Speed_kmh",
+                "Incident_Type (optional)"
+            ],
+            "sources": [
+                "Kaggle: Search for terms like 'Urban Traffic Dataset', 'City Traffic Volume', or 'Metro Interstate Traffic Volume'.",
+                "City Open Data Portals: Many major cities (e.g., New York City OpenData, London Datastore, Chicago Data Portal) publish extensive traffic volumes and sensor data.",
+                "TomTom or Here Technologies: They often release sample datasets for academic or research purposes regarding urban mobility."
+            ]
+        },
+        {
+            "category": "Environmental & Air Quality Data",
+            "purpose": "To fuel the 'Air Quality Index' (AQI) visualizations and trigger environmental alerts (e.g., pollution spikes).",
+            "requirements": [
+                "Historical AQI Readings: Hourly or daily logs of overall AQI.",
+                "Specific Pollutant Levels: Measurements of PM2.5, PM10, CO, NO2, SO2, and O3.",
+                "Meteorological Context: Temperature, humidity, and wind speed (as these heavily influence pollution dispersion)."
+            ],
+            "required_fields": [
+                "Timestamp",
+                "Sensor_Location",
+                "AQI",
+                "PM2_5",
+                "PM10",
+                "Temperature_C",
+                "Humidity_%"
+            ],
+            "sources": [
+                "World Air Quality Index (WAQI / aqicn.org): They offer historical datasets and APIs for thousands of stations globally.",
+                "OpenAQ: An open-source project aggregating physical air quality data from across the world.",
+                "Kaggle: Search for 'Air Quality Dataset' or specific city pollution data (e.g., 'Delhi Air Quality', 'Beijing PM2.5')."
+            ]
+        },
+        {
+            "category": "Energy Consumption Data",
+            "purpose": "To populate the 'Energy Consumption' metrics, illustrating grid load and identifying peak usage times.",
+            "requirements": [
+                "Grid Load Data: Hourly or sub-hourly electricity demand (in Megawatts or Kilowatts) for a specific city, region, or even a large smart building.",
+                "Energy Mix (Optional): Breakdown of energy sources (solar, wind, coal, etc.) if you want to add a sustainability metric later."
+            ],
+            "required_fields": [
+                "Timestamp",
+                "Region/Zone",
+                "Demand_MW",
+                "Temperature (Energy use is highly correlated with weather)"
+            ],
+            "sources": [
+                "Kaggle: Search for 'Hourly Energy Consumption', 'Smart Grid Load Data', or 'PJM Hourly Energy Consumption'.",
+                "National/Regional Grid Operators: Organizations like EIA (US Energy Information Administration), ENTSO-E (Europe), or local system operators often provide public datasets on grid demand."
+            ]
+        },
+        {
+            "category": "Citizen Feedback / 311 Service Requests",
+            "purpose": "To replace our generated citizen complaints with real issues reported by actual residents, providing authentic text descriptions and categories.",
+            "requirements": [
+                "Non-Emergency Service Requests: Logs of issues like potholes, broken streetlights, illegal dumping, or noise complaints."
+            ],
+            "required_fields": [
+                "Created_Date",
+                "Closed_Date",
+                "Complaint_Type",
+                "Descriptor/Description",
+                "Location/Address",
+                "Status"
+            ],
+            "sources": [
+                "City '311' Open Data: This is the best source. Cities like NYC, Chicago, and San Francisco have phenomenal, massive datasets of every 311 call made. Search term: 'NYC 311 Service Requests dataset' or 'Chicago 311 pothole reports'.",
+                "Kaggle: Look for abbreviated versions of these 311 datasets (e.g., 'NYC 311 Calls')."
+            ]
+        }
+    ],
+    "next_steps": [
+        "Once you find one or more of these datasets (CSV is usually easiest):",
+        "1. Download them and place them in a new folder called 'data' inside our project directory.",
+        "2. We will write a new script (similar to our current seed_db.py) that uses pandas to read your chosen CSV files, clean the data, map the real-world locations and timestamps, and insert them directly into our smartcity.db SQLite database.",
+        "3. The frontend dashboard will immediately reflect this real-world data without needing any UI changes!"
+    ]
+}

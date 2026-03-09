@@ -1,0 +1,221 @@
+{
+    "project": {
+        "name": "Smart City Digital Twin – Manager Panel",
+        "type": "Academic Demo System",
+        "course": "Internet of Things (CSE4004)",
+        "team": "ArchiteX",
+        "academic_year": "Winter Semester 2025-26",
+        "members": [
+            {
+                "name": "Aabir Chakraborty",
+                "id": "23BCE8981"
+            },
+            {
+                "name": "Harshit Kumar",
+                "id": "23BCE8355"
+            },
+            {
+                "name": "Devansh Misra",
+                "id": "23BCE7671"
+            },
+            {
+                "name": "Anchal Kumari",
+                "id": "23BCE7598"
+            },
+            {
+                "name": "Amit Kumar Deo",
+                "id": "23BCE7444"
+            }
+        ]
+    },
+    "system_overview": {
+        "description": "A web-based simulation platform demonstrating a centralized smart city management system using simulated IoT data, citizen feedback, and statistical decision support.",
+        "project_constraints": [
+            "No real IoT hardware",
+            "Simulated sensor data only",
+            "Free and open-source tools",
+            "Fully functional demo modules",
+            "Runs on standard laptops"
+        ]
+    },
+    "users": {
+        "administrator": {
+            "description": "City management authority monitoring system operations",
+            "capabilities": [
+                "View dashboard",
+                "Monitor city data",
+                "Review alerts",
+                "Analyze trends",
+                "Trigger simulated response actions"
+            ]
+        },
+        "citizen": {
+            "description": "Simulated user submitting feedback",
+            "capabilities": [
+                "Submit complaints",
+                "Report emergencies",
+                "Send service requests"
+            ]
+        }
+    },
+    "system_modules": [
+        {
+            "module_name": "Data Simulation Layer",
+            "purpose": "Generate artificial IoT data for city infrastructure",
+            "data_sources": [
+                "Traffic sensors",
+                "Air quality monitors",
+                "Energy meters",
+                "Emergency detection signals"
+            ]
+        },
+        {
+            "module_name": "Citizen Feedback Module",
+            "purpose": "Allow citizens to submit complaints and alerts",
+            "features": [
+                "Complaint form",
+                "Issue category selection",
+                "Location input",
+                "Issue description"
+            ]
+        },
+        {
+            "module_name": "Data Processing and Analytics Layer",
+            "purpose": "Process sensor and citizen data",
+            "functions": [
+                "Data aggregation",
+                "Trend analysis",
+                "Pattern detection",
+                "Issue identification"
+            ]
+        },
+        {
+            "module_name": "Decision Support System",
+            "purpose": "Predict possible urban issues",
+            "methods": [
+                "Bayesian probability estimation",
+                "Statistical modeling"
+            ],
+            "predictions": [
+                "Traffic congestion",
+                "Air pollution spikes",
+                "Energy overload",
+                "Emergency escalation"
+            ]
+        },
+        {
+            "module_name": "Governance Dashboard",
+            "purpose": "Provide real-time city monitoring interface",
+            "components": [
+                "Traffic visualization",
+                "Air quality charts",
+                "Energy usage graphs",
+                "Alerts panel",
+                "Complaint tracking"
+            ]
+        },
+        {
+            "module_name": "Emergency Response Module",
+            "purpose": "Simulate administrative actions",
+            "actions": [
+                "Traffic rerouting simulation",
+                "Emergency alerts",
+                "Resource coordination"
+            ]
+        },
+        {
+            "module_name": "Reliability Layer",
+            "purpose": "Improve system trustworthiness",
+            "features": [
+                "Misinformation filtering",
+                "Complaint validation",
+                "Authority notification simulation"
+            ]
+        }
+    ],
+    "functional_requirements": [
+        "Generate simulated IoT sensor data",
+        "Accept citizen complaints through forms",
+        "Analyze sensor and complaint data",
+        "Predict potential urban issues",
+        "Generate alerts based on threshold conditions",
+        "Display visual dashboards with charts",
+        "Allow administrative response actions"
+    ],
+    "non_functional_requirements": {
+        "performance": [
+            "Dashboard loads within 3 seconds",
+            "Efficient processing of simulated data"
+        ],
+        "usability": [
+            "Simple web interface",
+            "Clear data visualization"
+        ],
+        "security": [
+            "Admin login authentication",
+            "Input validation"
+        ],
+        "reliability": [
+            "System should handle invalid inputs",
+            "Prevent system crashes"
+        ]
+    },
+    "database_schema": {
+        "SensorData": {
+            "fields": [
+                "SensorID",
+                "Location",
+                "SensorType",
+                "Value",
+                "Timestamp"
+            ]
+        },
+        "Complaints": {
+            "fields": [
+                "ComplaintID",
+                "Category",
+                "Location",
+                "Description",
+                "Status"
+            ]
+        },
+        "Alerts": {
+            "fields": [
+                "AlertID",
+                "AlertType",
+                "Severity",
+                "Timestamp"
+            ]
+        }
+    },
+    "technology_stack": {
+        "frontend": [
+            "HTML",
+            "CSS",
+            "JavaScript"
+        ],
+        "backend": [
+            "Python",
+            "Flask or Django"
+        ],
+        "database": [
+            "SQLite",
+            "JSON"
+        ],
+        "analytics": [
+            "Pandas",
+            "NumPy",
+            "Scikit-learn"
+        ],
+        "visualization": [
+            "Plotly",
+            "Matplotlib"
+        ]
+    },
+    "future_scope": [
+        "Integration with real IoT sensors",
+        "Real-time city data feeds",
+        "Advanced AI prediction models",
+        "Government emergency integration"
+    ]
+}

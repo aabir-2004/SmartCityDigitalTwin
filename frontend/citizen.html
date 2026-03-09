@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citizen Module | Smart City</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .form-container {
+            max-width: 650px;
+            margin: 1rem 0 3rem;
+        }
+
+        .status-message {
+            display: none;
+            padding: 1rem;
+            border-radius: var(--border-radius-md);
+            background: rgba(5, 205, 153, 0.1);
+            color: var(--status-success);
+            margin-top: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .status-message.error {
+            background: rgba(238, 93, 80, 0.1);
+            color: var(--status-danger);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+
+        <!-- Primary Sidebar -->
+        <nav class="sidebar-primary">
+            <a href="index.html" class="sidebar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="width: 24px; height: 24px; border-radius: 4px; color: white; background: var(--accent-blue); padding: 2px;">
+                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                    <path d="M9 22v-4h6v4"></path>
+                    <path d="M8 6h.01"></path>
+                    <path d="M16 6h.01"></path>
+                    <path d="M12 6h.01"></path>
+                    <path d="M12 10h.01"></path>
+                    <path d="M12 14h.01"></path>
+                    <path d="M16 10h.01"></path>
+                    <path d="M16 14h.01"></path>
+                    <path d="M8 10h.01"></path>
+                    <path d="M8 14h.01"></path>
+                </svg>
+            </a>
+            <a href="admin.html" class="sidebar-icon"><i data-lucide="layout-dashboard"></i></a>
+            <a href="citizen.html" class="sidebar-icon active"><i data-lucide="users"></i></a>
+        </nav>
+
+        <!-- Contextual Sidebar -->
+        <aside class="sidebar-context">
+            <a href="index.html" class="context-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="width: 32px; height: 32px; border-radius: 8px; color: white; background: var(--accent-blue); padding: 4px;">
+                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                    <path d="M9 22v-4h6v4"></path>
+                    <path d="M8 6h.01"></path>
+                    <path d="M16 6h.01"></path>
+                    <path d="M12 6h.01"></path>
+                    <path d="M12 10h.01"></path>
+                    <path d="M12 14h.01"></path>
+                    <path d="M16 10h.01"></path>
+                    <path d="M16 14h.01"></path>
+                    <path d="M8 10h.01"></path>
+                    <path d="M8 14h.01"></path>
+                </svg>
+                <span style="color: var(--accent-blue);">Smart</span>City
+            </a>
+            <div class="context-menu">
+                <a href="citizen.html" class="context-link active">
+                    <i data-lucide="file-edit" style="width: 18px; height: 18px;"></i> Submit Report
+                </a>
+                <a href="#" class="context-link">
+                    <i data-lucide="file-text" style="width: 18px; height: 18px;"></i> My Feedback
+                </a>
+                <a href="#" class="context-link">
+                    <i data-lucide="settings" style="width: 18px; height: 18px;"></i> Preferences
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content fade-in">
+            <header class="top-header">
+                <div>
+                    <div class="breadcrumb">Pages / Citizen Portal</div>
+                    <h1 class="page-title">Submit Feedback</h1>
+                </div>
+                <div class="header-widgets">
+                    <span style="cursor: pointer; display: flex; align-items: center; color: var(--text-secondary);">
+                        <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+                    </span>
+                    <div
+                        style="width: 35px; height: 35px; border-radius: 50%; background: var(--accent-secondary); display: grid; place-items: center; color: white; font-weight: 700; font-size: 0.875rem;">
+                        CT</div>
+                </div>
+            </header>
+
+            <div class="soft-card form-container delay-100">
+                <h2 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Report Issue</h2>
+                <p class="text-secondary" style="margin-bottom: 2rem;">
+                    Report city infrastructure issues or emergencies securely to the managerial dashboard.
+                </p>
+
+                <form id="complaintForm">
+
+                    <div class="form-group">
+                        <label class="form-label" for="category">Issue Category</label>
+                        <select id="category" name="category" class="form-control" required>
+                            <option value="" disabled selected>Select an issue category</option>
+                            <option value="Traffic">Traffic Congestion/Accident</option>
+                            <option value="Infrastructure">Faulty Infrastructure (e.g., Broken Light)</option>
+                            <option value="Emergency">Urgent Emergency (Medical/Fire)</option>
+                            <option value="Pollution">Air/Noise Pollution</option>
+                            <option value="General">General Service Request</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="location">Location (Zone / Street)</label>
+                        <input type="text" id="location" name="location" class="form-control"
+                            placeholder="e.g. Sector 4, MG Road" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="description">Detailed Description</label>
+                        <textarea id="description" name="description" class="form-control"
+                            placeholder="Please describe the issue in detail..." required></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; align-items: center; justify-content: flex-end;">
+                        <button type="reset" class="btn btn-secondary">Clear</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <span>Submit Report</span>
+                        </button>
+                    </div>
+
+                    <div id="statusMessage" class="status-message"></div>
+                </form>
+            </div>
+        </main>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+    <script src="js/data-sim.js"></script>
+    <script src="js/citizen.js"></script>
+</body>
+
+</html>

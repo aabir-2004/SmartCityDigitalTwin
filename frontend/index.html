@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart City Digital Twin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      display: block;
+      background: var(--bg-base);
+    }
+
+    .app-header {
+      padding: 1.5rem 0;
+      background: var(--bg-surface);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .logo-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: var(--transition-smooth);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--accent-blue);
+      background: rgba(30, 58, 95, 0.05);
+    }
+
+    .hero-section {
+      text-align: center;
+      padding: 6rem 0 4rem;
+    }
+
+    .hero-title {
+      font-size: 4rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+      margin-bottom: 4rem;
+    }
+
+    .portal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .portal-card {
+      padding: 2.5rem;
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      position: relative;
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .portal-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(30, 58, 95, 0.1);
+    }
+
+    .portal-icon {
+      color: var(--accent-blue);
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .portal-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    .portal-desc {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <header class="app-header">
+    <div class="container header-content">
+      <a href="index.html" class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" class="logo-img"
+          style="color: white; background: var(--accent-blue); padding: 5px;">
+          <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+          <path d="M9 22v-4h6v4"></path>
+          <path d="M8 6h.01"></path>
+          <path d="M16 6h.01"></path>
+          <path d="M12 6h.01"></path>
+          <path d="M12 10h.01"></path>
+          <path d="M12 14h.01"></path>
+          <path d="M16 10h.01"></path>
+          <path d="M16 14h.01"></path>
+          <path d="M8 10h.01"></path>
+          <path d="M8 14h.01"></path>
+        </svg>
+        <span>SmartCity<span class="text-brand">Twin</span></span>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link active">Home</a>
+        <a href="citizen.html" class="nav-link">Citizen</a>
+        <a href="admin.html" class="nav-link">Manager Panel</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container hero-section fade-in">
+    <h1 class="hero-title">
+      City Infrastructure,<br>
+      <span class="text-brand">Powered by Data.</span>
+    </h1>
+    <p class="hero-subtitle delay-100 fade-in">
+      A web-based simulation platform demonstrating a centralized smart city management system using simulated IoT data
+      and citizen feedback.
+    </p>
+
+    <div class="portal-grid delay-200 fade-in">
+      <!-- Citizen Portal Entry -->
+      <a href="citizen.html" class="soft-card portal-card">
+        <div class="portal-icon">
+          <i data-lucide="message-square" style="width: 48px; height: 48px;"></i>
+        </div>
+        <h2 class="portal-title">Citizen Portal</h2>
+        <p class="portal-desc">
+          Submit feedback, report urban emergencies, and send service requests to city authorities.
+        </p>
+      </a>
+
+      <!-- Admin Portal Entry -->
+      <a href="admin.html" class="soft-card portal-card">
+        <div class="portal-icon">
+          <i data-lucide="layout-dashboard" style="width: 48px; height: 48px;"></i>
+        </div>
+        <h2 class="portal-title">Manager Panel</h2>
+        <p class="portal-desc">
+          Monitor live simulated IoT metrics, manage incoming complaints, and trigger emergency protocols.
+        </p>
+      </a>
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+
+</html>
