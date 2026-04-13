@@ -1,14 +1,15 @@
 :root {
-  /* Custom Mode Palette from Template */
-  --bg-base: #F5F6F7;
-  --bg-surface: #FFFFFF;
-  --text-primary: #1A1A1A;
-  --text-secondary: #6B6B6B;
+  /* Custom Mode Palette matching Dark Theme Mockup */
+  --bg-base: #14162b;
+  --bg-surface: #1e213a;
+  --bg-surface-light: #282c4d;
+  --text-primary: #ffffff;
+  --text-secondary: #8c96ba;
 
   /* Brand Accents */
-  --accent-blue: #1E3A5F;
-  --accent-secondary: #4A6FA5;
-  --accent-hover: #152842;
+  --accent-blue: #1d7af0;
+  --accent-secondary: #0a4fbc;
+  --accent-hover: #408bf4;
 
   /* Status Colors */
   --status-success: #05CD99;
@@ -16,9 +17,9 @@
   --status-danger: #EE5D50;
 
   /* UI Elements */
-  --card-shadow: 0px 40px 60px rgba(112, 144, 176, 0.08);
-  --border-radius-lg: 20px;
-  --border-radius-md: 12px;
+  --card-shadow: 0px 15px 35px rgba(0, 0, 0, 0.3);
+  --border-radius-lg: 16px;
+  --border-radius-md: 10px;
 
   --font-family: 'Inter', 'DM Sans', system-ui, sans-serif;
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -65,7 +66,6 @@ h4 {
   overflow: hidden;
 }
 
-/* Primary Sidebar */
 .sidebar-primary {
   width: 80px;
   background-color: var(--bg-surface);
@@ -73,8 +73,21 @@ h4 {
   flex-direction: column;
   align-items: center;
   padding: 2rem 0;
-  border-right: 1px solid rgba(0, 0, 0, 0.05);
+  border-right: none;
   z-index: 10;
+}
+
+.user-profile-icon {
+  width: 60px;
+  height: 60px;
+  background-color: var(--bg-base);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin-bottom: 2rem;
+  border: 3px solid var(--accent-blue);
+  box-shadow: 0 0 15px rgba(29, 122, 240, 0.5);
+  color: #fff;
 }
 
 .sidebar-icon {
@@ -108,8 +121,9 @@ h4 {
   padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(0, 0, 0, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
   z-index: 5;
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
 }
 
 .context-logo {
@@ -131,25 +145,27 @@ h4 {
 
 .context-link {
   padding: 0.875rem 1rem;
-  border-radius: var(--border-radius-md);
+  border-radius: 30px;
   color: var(--text-secondary);
   text-decoration: none;
   font-weight: 500;
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  margin-bottom: 0.5rem;
   transition: var(--transition-smooth);
 }
 
 .context-link.active {
-  background-color: rgba(30, 58, 95, 0.05);
-  color: var(--accent-blue);
+  background-color: var(--accent-blue);
+  color: #fff;
   font-weight: 600;
+  box-shadow: 0 4px 15px rgba(29, 122, 240, 0.5);
 }
 
 .context-link:hover:not(.active) {
   color: var(--text-primary);
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 /* Main Content Area */
@@ -172,6 +188,8 @@ h4 {
 .page-title {
   font-size: 1.75rem;
   font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
 .breadcrumb {
@@ -187,7 +205,8 @@ h4 {
   background: var(--bg-surface);
   padding: 0.5rem 1.25rem;
   border-radius: 30px;
-  box-shadow: 0 10px 20px rgba(112, 144, 176, 0.05);
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Cards & Panels */
@@ -196,7 +215,30 @@ h4 {
   border-radius: var(--border-radius-lg);
   padding: 25px;
   box-shadow: var(--card-shadow);
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-header-bar {
+  background: var(--accent-blue);
+  color: #fff;
+  padding: 10px 25px;
+  margin: -25px -25px 20px -25px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.card-header-tag {
+  background: var(--bg-surface);
+  color: var(--accent-blue);
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
 }
 
 /* Grid Layouts */
@@ -303,22 +345,23 @@ h4 {
 .btn-primary {
   background: var(--accent-blue);
   color: #fff;
-  box-shadow: 0 10px 20px rgba(30, 58, 95, 0.2);
+  box-shadow: 0 6px 16px rgba(29, 122, 240, 0.4);
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
   background: var(--accent-hover);
-  box-shadow: 0 12px 25px rgba(30, 58, 95, 0.3);
+  box-shadow: 0 8px 20px rgba(29, 122, 240, 0.5);
 }
 
 .btn-secondary {
-  background: rgba(30, 58, 95, 0.05);
-  color: var(--accent-blue);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(30, 58, 95, 0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .btn-danger {
@@ -350,8 +393,8 @@ h4 {
 
 .form-control {
   width: 100%;
-  background: #F4F7FE;
-  border: 1px solid transparent;
+  background: var(--bg-surface-light);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--border-radius-md);
   padding: 0.875rem 1rem;
   color: var(--text-primary);
@@ -362,9 +405,9 @@ h4 {
 
 .form-control:focus {
   outline: none;
-  background: #FFFFFF;
+  background: var(--bg-surface-light);
   border-color: var(--accent-blue);
-  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+  box-shadow: 0 0 0 3px rgba(29, 122, 240, 0.2);
 }
 
 textarea.form-control {
@@ -384,7 +427,7 @@ select.form-control {
 .alert-item {
   padding: 1rem;
   border-radius: var(--border-radius-md);
-  background: #F4F7FE;
+  background: var(--bg-surface-light);
   border-left: 4px solid transparent;
   margin-bottom: 0.75rem;
   transition: var(--transition-smooth);
@@ -447,12 +490,12 @@ th {
   color: var(--text-secondary);
   font-weight: 500;
   font-size: 0.875rem;
-  border-bottom: 1px solid #E2E8F0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 td {
   padding: 1rem;
-  border-bottom: 1px solid #F4F7FE;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
   color: var(--text-primary);
   font-size: 0.95rem;
   font-weight: 600;
@@ -474,6 +517,11 @@ td {
 .badge-progress {
   background: rgba(5, 205, 153, 0.1);
   color: var(--status-success);
+}
+
+.badge-resolved {
+  background: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
 }
 
 /* Utilities */

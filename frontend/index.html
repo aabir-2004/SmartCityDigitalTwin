@@ -164,9 +164,7 @@
         <span>SmartCity<span class="text-brand">Twin</span></span>
       </a>
       <nav class="nav-links">
-        <a href="index.html" class="nav-link active">Home</a>
-        <a href="citizen.html" class="nav-link">Citizen</a>
-        <a href="admin.html" class="nav-link">Manager Panel</a>
+        <a href="index.html" class="nav-link active">Sign In</a>
       </nav>
     </div>
   </header>
@@ -182,33 +180,45 @@
       and citizen feedback.
     </p>
 
-    <div class="portal-grid delay-200 fade-in">
-      <!-- Citizen Portal Entry -->
-      <a href="citizen.html" class="soft-card portal-card">
-        <div class="portal-icon">
-          <i data-lucide="message-square" style="width: 48px; height: 48px;"></i>
-        </div>
-        <h2 class="portal-title">Citizen Portal</h2>
-        <p class="portal-desc">
-          Submit feedback, report urban emergencies, and send service requests to city authorities.
-        </p>
-      </a>
-
-      <!-- Admin Portal Entry -->
-      <a href="admin.html" class="soft-card portal-card">
-        <div class="portal-icon">
-          <i data-lucide="layout-dashboard" style="width: 48px; height: 48px;"></i>
-        </div>
-        <h2 class="portal-title">Manager Panel</h2>
-        <p class="portal-desc">
-          Monitor live simulated IoT metrics, manage incoming complaints, and trigger emergency protocols.
-        </p>
-      </a>
+    <div class="login-container delay-200 fade-in" style="max-width: 400px; margin: 0 auto; text-align: left;">
+      <div class="soft-card">
+        <h2 class="portal-title" style="text-align: center; margin-bottom: 1.5rem;">Access Portal</h2>
+        <form id="signInForm" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label" for="userId">User ID</label>
+            <input type="text" id="userId" class="form-control" placeholder="Enter User ID" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="userPassword">Password</label>
+            <input type="password" id="userPassword" class="form-control" placeholder="Enter Password" required>
+          </div>
+          <div id="loginError"
+            style="color: var(--status-danger); font-size: 0.875rem; display: none; margin-bottom: 1rem; text-align: center; font-weight: 500;">
+            Invalid ID or Password
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
+        </form>
+      </div>
     </div>
   </main>
 
   <script>
     lucide.createIcons();
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const userId = document.getElementById('userId').value.trim().toUpperCase();
+      const password = document.getElementById('userPassword').value.trim();
+      const errorMsg = document.getElementById('loginError');
+
+      if (userId === 'AABIR' && password === '2004') {
+        window.location.href = 'citizen.html';
+      } else if (userId === 'MAYOR' && password === '2004') {
+        window.location.href = 'admin.html';
+      } else {
+        errorMsg.style.display = 'block';
+      }
+    }
   </script>
 </body>
 

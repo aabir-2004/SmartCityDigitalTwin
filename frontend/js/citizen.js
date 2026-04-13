@@ -6,11 +6,13 @@ class CitizenPortal {
             submitBtn: document.getElementById('submitBtn'),
             inputCategory: document.getElementById('category'),
             inputLocation: document.getElementById('location'),
-            inputDescription: document.getElementById('description')
+            inputDescription: document.getElementById('description'),
+            locationDatalist: document.getElementById('locationOptions')
         };
-        
+
         if (this.DOM.form) {
             this.bindEvents();
+            this.fetchLocations();
         }
     }
 
@@ -18,9 +20,27 @@ class CitizenPortal {
         this.DOM.form.addEventListener('submit', this.handleSubmission.bind(this));
     }
 
+    async fetchLocations() {
+        if (!this.DOM.locationDatalist) return;
+        try {
+            const req = await fetch('/api/locations');
+            if (req.ok) {
+                const locations = await req.json();
+                this.DOM.locationDatalist.innerHTML = '';
+                locations.forEach(loc => {
+                    const opt = document.createElement('option');
+                    opt.value = loc;
+                    this.DOM.locationDatalist.appendChild(opt);
+                });
+            }
+        } catch (err) {
+            console.warn('[Locations] Could not fetch locations:', err);
+        }
+    }
+
     async handleSubmission(event) {
         event.preventDefault();
-        
+
         this.toggleSubmitState(true);
 
         const payload = {
@@ -41,7 +61,7 @@ class CitizenPortal {
             }
 
             const data = await response.json();
-            
+
             if (data.success) {
                 this.displayStatus("Your report has been successfully routed to the civil engineering unit.", "success");
                 this.DOM.form.reset();
@@ -53,7 +73,7 @@ class CitizenPortal {
             this.displayStatus("Service unavailable. Please verify your connection or try again later.", "error");
         } finally {
             this.toggleSubmitState(false);
-            
+
             setTimeout(() => {
                 if (this.DOM.statusMsg) {
                     this.DOM.statusMsg.style.display = "none";
@@ -64,7 +84,7 @@ class CitizenPortal {
 
     toggleSubmitState(isSubmitting) {
         if (!this.DOM.submitBtn) return;
-        
+
         if (isSubmitting) {
             this.DOM.submitBtn.innerHTML = `<span>Processing</span>`;
             this.DOM.submitBtn.disabled = true;
@@ -76,12 +96,12 @@ class CitizenPortal {
 
     displayStatus(message, type) {
         if (!this.DOM.statusMsg) return;
-        
+
         this.DOM.statusMsg.textContent = message;
         if (type === "error") {
-             this.DOM.statusMsg.className = "status-message error fade-in";
+            this.DOM.statusMsg.className = "status-message error fade-in";
         } else {
-             this.DOM.statusMsg.className = "status-message fade-in";
+            this.DOM.statusMsg.className = "status-message fade-in";
         }
         this.DOM.statusMsg.style.display = "block";
     }

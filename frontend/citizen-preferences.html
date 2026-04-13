@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citizen Module | Smart City</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .form-container {
+            max-width: 650px;
+            margin: 1rem 0 3rem;
+        }
+
+        .status-message {
+            display: none;
+            padding: 1rem;
+            border-radius: var(--border-radius-md);
+            background: rgba(5, 205, 153, 0.1);
+            color: var(--status-success);
+            margin-top: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .status-message.error {
+            background: rgba(238, 93, 80, 0.1);
+            color: var(--status-danger);
+        }
+
+        .custom-range {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: var(--range-color, var(--accent-blue));
+            outline: none;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+
+        .custom-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--range-color, var(--accent-blue));
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            transition: border-color 0.3s;
+        }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            padding: 0 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+
+        <!-- Primary Sidebar -->
+        <nav class="sidebar-primary">
+            <a href="index.html" class="sidebar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="width: 24px; height: 24px; border-radius: 4px; color: white; background: var(--accent-blue); padding: 2px;">
+                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                    <path d="M9 22v-4h6v4"></path>
+                    <path d="M8 6h.01"></path>
+                    <path d="M16 6h.01"></path>
+                    <path d="M12 6h.01"></path>
+                    <path d="M12 10h.01"></path>
+                    <path d="M12 14h.01"></path>
+                    <path d="M16 10h.01"></path>
+                    <path d="M16 14h.01"></path>
+                    <path d="M8 10h.01"></path>
+                    <path d="M8 14h.01"></path>
+                </svg>
+            </a>
+            <a href="citizen.html" class="sidebar-icon active" title="Citizen Portal"><i data-lucide="users"></i></a>
+            <a href="index.html" class="sidebar-icon" title="Sign Out" style="margin-top: auto;"><i
+                    data-lucide="log-out"></i></a>
+        </nav>
+
+        <!-- Contextual Sidebar -->
+        <aside class="sidebar-context">
+            <a href="index.html" class="context-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="width: 32px; height: 32px; border-radius: 8px; color: white; background: var(--accent-blue); padding: 4px;">
+                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                    <path d="M9 22v-4h6v4"></path>
+                    <path d="M8 6h.01"></path>
+                    <path d="M16 6h.01"></path>
+                    <path d="M12 6h.01"></path>
+                    <path d="M12 10h.01"></path>
+                    <path d="M12 14h.01"></path>
+                    <path d="M16 10h.01"></path>
+                    <path d="M16 14h.01"></path>
+                    <path d="M8 10h.01"></path>
+                    <path d="M8 14h.01"></path>
+                </svg>
+                <span style="color: var(--accent-blue);">Smart</span>City
+            </a>
+            <div class="context-menu">
+                <a href="citizen.html" class="context-link">
+                    <i data-lucide="file-edit" style="width: 18px; height: 18px;"></i> Submit Report
+                </a>
+                <a href="citizen-feedback.html" class="context-link">
+                    <i data-lucide="file-text" style="width: 18px; height: 18px;"></i> My Feedback
+                </a>
+                <a href="citizen-preferences.html" class="context-link active">
+                    <i data-lucide="settings" style="width: 18px; height: 18px;"></i> Preferences
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content fade-in">
+            <header class="top-header">
+                <div>
+                    <div class="breadcrumb">Pages / Citizen Portal</div>
+                    <h1 class="page-title">My Preferences</h1>
+                </div>
+                <div class="header-widgets">
+                    <span style="cursor: pointer; display: flex; align-items: center; color: var(--text-secondary);">
+                        <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+                    </span>
+                    <div
+                        style="width: 35px; height: 35px; border-radius: 50%; background: var(--accent-secondary); display: grid; place-items: center; color: white; font-weight: 700; font-size: 0.875rem;">
+                        CT</div>
+                </div>
+            </header>
+
+            <div class="soft-card form-container delay-100">
+                <h2 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Dashboard Customization</h2>
+                <p class="text-secondary" style="margin-bottom: 2rem;">
+                    Configure your community alerts, resource tracking scales, and notification behaviors.
+                </p>
+
+                <form id="preferencesForm">
+
+                    <div class="form-group" style="padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <label class="form-label" for="districtPref">Primary Sector Monitoring</label>
+                        <select id="districtPref" name="districtPref" class="form-control" required>
+                            <option value="all" selected>All Zones (Global View)</option>
+                            <option value="Sector 4 Industrial Park">Sector 4 Industrial Park</option>
+                            <option value="Downtown Central Hub">Downtown Central Hub</option>
+                            <option value="Financial District">Financial District</option>
+                            <option value="Green Valley Suburb">Green Valley Suburb</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <label class="form-label">Alert Sensitivity Threshold</label>
+                        <p class="text-secondary" style="font-size: 0.8rem; margin-bottom: 0.5rem;">Slide to adjust how frequently you wish to receive community updates. (Low = Blue, Moderate = Green, High = Red)</p>
+                        <input type="range" min="0" max="100" value="50" class="custom-range">
+                        <div class="range-labels">
+                            <span>Low (Rare)</span>
+                            <span>Moderate</span>
+                            <span>High (Frequent)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <label class="form-label">Target Resource Usage Limit (Energy/Water)</label>
+                        <p class="text-secondary" style="font-size: 0.8rem; margin-bottom: 0.5rem;">Set your monthly conservation tracking limit. System will turn red if usage is high.</p>
+                        <input type="range" min="0" max="100" value="20" class="custom-range" id="usageTarget">
+                        <div class="range-labels">
+                            <span>Conservative (Low)</span>
+                            <span>Average</span>
+                            <span>Intensive (High)</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; align-items: center; justify-content: flex-end; margin-top: 1.5rem;">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <span>Save Preferences</span>
+                        </button>
+                    </div>
+
+                    <div id="statusMessage" class="status-message"></div>
+                </form>
+            </div>
+        </main>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Custom Range Logic mapping value ranges to colors dynamically
+        document.querySelectorAll('.custom-range').forEach(input => {
+            const updateColor = () => {
+                const val = parseInt(input.value);
+                const max = parseInt(input.max) || 100;
+                const percentage = val / max;
+                let color;
+                
+                if (percentage <= 0.33) {
+                    color = '#1d7af0'; // Blue for low/safe
+                } else if (percentage <= 0.66) {
+                    color = '#05CD99'; // Green for moderate
+                } else {
+                    color = '#EE5D50'; // Red for high/danger
+                }
+                
+                input.style.setProperty('--range-color', color);
+            };
+            input.addEventListener('input', updateColor);
+            updateColor(); // Initialize immediately
+        });
+        
+        document.getElementById('preferencesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = '<span>Saving...</span>';
+            setTimeout(() => {
+                btn.innerHTML = '<span>Save Preferences</span>';
+                const msg = document.getElementById('statusMessage');
+                msg.textContent = 'Preferences successfully updated!';
+                msg.className = 'status-message fade-in';
+                msg.style.display = 'block';
+                setTimeout(() => msg.style.display = 'none', 3000);
+            }, 800);
+        });
+    </script>
+</body>
+
+</html>

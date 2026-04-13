@@ -42,6 +42,15 @@ def initialize_database() -> None:
                 Timestamp TEXT
             )
         ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS AdminActions (
+                ActionID TEXT PRIMARY KEY,
+                ActionType TEXT,
+                TargetLocation TEXT,
+                Result TEXT,
+                Timestamp TEXT
+            )
+        ''')
         
         cursor.execute("SELECT COUNT(*) FROM Complaints")
         if cursor.fetchone()[0] == 0:

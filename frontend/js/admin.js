@@ -7,12 +7,15 @@ class AdminDashboard {
         };
         this.chartInstances = {};
         this.alertRegistry = new Set();
+        this.markers = {};
 
         this.domReferences();
+        this.initializeMap();
         this.initializeCharts();
         this.attachGlobalActions();
 
         this.startDataLoops();
+        this.fetchLocations();
     }
 
     domReferences() {
@@ -23,7 +26,8 @@ class AdminDashboard {
             alertsContainer: document.getElementById('alertsContainer'),
             complaintBody: document.getElementById('complaintTableBody'),
             actionStatusContainer: document.getElementById('actionStatus'),
-            actionStatusText: document.getElementById('actionStatusText')
+            actionStatusText: document.getElementById('actionStatusText'),
+            cityMap: document.getElementById('cityMap')
         };
     }
 
@@ -43,7 +47,7 @@ class AdminDashboard {
         };
     }
 
-    buildTimeseries(contextId, strokeColor) {
+    buildTimeseries(contextId, strokeColor, fillColor) {
         const canvas = document.getElementById(contextId);
         if (!canvas) return null;
 
@@ -56,9 +60,9 @@ class AdminDashboard {
                 datasets: [{
                     data: new Array(20).fill(0).map(() => Math.floor(Math.random() * 40) + 20),
                     borderColor: strokeColor,
-                    backgroundColor: 'transparent',
-                    borderWidth: 2,
-                    fill: false
+                    backgroundColor: fillColor,
+                    borderWidth: 3,
+                    fill: true
                 }]
             },
             options: this.getChartConfiguration()
@@ -67,10 +71,55 @@ class AdminDashboard {
 
     initializeCharts() {
         this.chartInstances = {
-            traffic: this.buildTimeseries('trafficChart', '#1e3a8a'),
-            aqi: this.buildTimeseries('aqiChart', '#3b82f6'),
-            energy: this.buildTimeseries('energyChart', '#ef4444')
+            traffic: this.buildTimeseries('trafficChart', '#1d7af0', 'rgba(29, 122, 240, 0.2)'),
+            aqi: this.buildTimeseries('aqiChart', '#05CD99', 'rgba(5, 205, 153, 0.2)'),
+            energy: this.buildTimeseries('energyChart', '#b388ff', 'rgba(179, 136, 255, 0.2)')
         };
+    }
+
+    initializeMap() {
+        if (!this.nodes.cityMap || typeof L === 'undefined') return;
+
+        // Base New York coordinate
+        this.map = L.map('cityMap').setView([40.7128, -74.0060], 12);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+        }).addTo(this.map);
+    }
+
+    getLocationCoordinates(locationName) {
+        // Handpicked terrestrial GPS coordinates across New York City zones
+        const nycZoningMap = {
+            "Downtown Central Hub": [40.7580, -73.9855], // Midtown/Times Sq
+            "Sector 4 Industrial Park": [40.7022, -73.9739], // Brooklyn Navy Yard
+            "Northside Residential": [40.7870, -73.9754], // Upper West Side
+            "East Side Highway": [40.7225, -73.9734], // FDR/East Village
+            "MG Road Intercept": [40.7188, -74.0016], // Tribeca/Canal St
+            "Airport Express Link": [40.7716, -73.8744], // LaGuardia proximity
+            "Green Valley Suburb": [40.6602, -73.9690], // Prospect Park
+            "City Hospital Junction": [40.7903, -73.9525], // Mount Sinai area
+            "Tech Park Avenue": [40.7411, -73.9897], // Silicon Alley/Flatiron
+            "Riverfront Promenade": [40.7116, -74.0163], // Battery Park City
+            "Financial District": [40.7075, -74.0113], // Wall St
+            "Old Town Square": [40.7308, -73.9973] // Washington Sq Park
+        };
+
+        if (nycZoningMap[locationName]) {
+            return nycZoningMap[locationName];
+        }
+
+        // Deterministic fallback array of guaranteed dry-land points in NYC in case of new sectors
+        const safeLandPoints = [
+            [40.7282, -73.9942], [40.7356, -74.0012], [40.6925, -73.9904],
+            [40.8093, -73.9485], [40.7614, -73.9776], [40.8296, -73.9262]
+        ];
+
+        let hash = 0;
+        for (let i = 0; i < locationName.length; i++) {
+            hash = locationName.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        return safeLandPoints[Math.abs(hash) % safeLandPoints.length];
     }
 
     async syncTelemetry() {
@@ -151,8 +200,44 @@ class AdminDashboard {
                     this.alertRegistry.add(evt.id);
 
                     let notificationClass = 'alert-info';
-                    if (evt.severity === 'Critical') notificationClass = 'alert-critical';
-                    if (evt.severity === 'Warning') notificationClass = 'alert-warning';
+                    let alertColorHex = '#3b82f6';
+
+                    if (evt.severity === 'Critical') {
+                        notificationClass = 'alert-critical';
+                        alertColorHex = '#ef4444';
+                    } else if (evt.severity === 'Warning') {
+                        notificationClass = 'alert-warning';
+                        alertColorHex = '#f59e0b';
+                    }
+
+                    // Map specific logic: Search description for a known location
+                    let matchedLoc = null;
+                    for (let loc of Object.keys(this.markers)) {
+                        if (evt.desc.includes(loc)) {
+                            matchedLoc = loc;
+                            break;
+                        }
+                    }
+
+                    if (this.map && matchedLoc && this.markers[matchedLoc]) {
+                        const marker = this.markers[matchedLoc];
+                        marker.setPopupContent(`<b>${matchedLoc}</b><br><span style="color:${alertColorHex}">${evt.severity}: ${evt.type}</span>`);
+
+                        // Create a ping visual effect
+                        const circle = L.circle(marker.getLatLng(), {
+                            color: alertColorHex,
+                            fillColor: alertColorHex,
+                            fillOpacity: 0.4,
+                            radius: 1200
+                        }).addTo(this.map);
+
+                        this.map.panTo(marker.getLatLng());
+
+                        // Remove ping circle after 5s
+                        setTimeout(() => {
+                            if (this.map) this.map.removeLayer(circle);
+                        }, 5000);
+                    }
 
                     const alertBlock = document.createElement('div');
                     alertBlock.className = `alert-item ${notificationClass} fade-in`;
@@ -176,22 +261,59 @@ class AdminDashboard {
         }
     }
 
-    dispatchProcedure(commandTitle) {
+    async fetchLocations() {
+        try {
+            const req = await fetch('/api/locations');
+            if (req.ok) {
+                const locations = await req.json();
+                const selects = document.querySelectorAll('.location-select');
+                selects.forEach(select => {
+                    select.innerHTML = '<option value="" disabled selected>Select Target Sector...</option>';
+                    locations.forEach(loc => {
+                        const opt = document.createElement('option');
+                        opt.value = loc;
+                        opt.textContent = loc;
+                        select.appendChild(opt);
+                    });
+                });
+
+                if (this.map) {
+                    // Populate GPS map markers
+                    locations.forEach(loc => {
+                        const coords = this.getLocationCoordinates(loc);
+                        const marker = L.marker(coords).addTo(this.map)
+                            .bindPopup(`<b>${loc}</b><br><span style="color:var(--status-success);">Status: Operating Normally</span>`);
+                        this.markers[loc] = marker;
+                    });
+                }
+            }
+        } catch (err) {
+            console.warn('[Locations] Could not fetch locations:', err);
+        }
+    }
+
+    dispatchProcedure(actionType) {
         if (!this.nodes.actionStatusContainer) return;
+
+        let location = 'City-Wide';
+        const select = document.getElementById('actionLocationSelect');
+        if (select && select.value) {
+            location = select.value;
+        }
 
         this.nodes.actionStatusContainer.style.display = 'block';
         this.nodes.actionStatusContainer.className = 'alert-item alert-critical fade-in';
-        this.nodes.actionStatusText.innerHTML = `<strong>Command Sent:</strong> Processing routing directives...`;
+        this.nodes.actionStatusText.innerHTML = `<strong>Command Sent:</strong> Deploying directive to ${location}...`;
 
         fetch('/api/actions/trigger', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: commandTitle })
+            body: JSON.stringify({ actionType: actionType, location: location })
         })
             .then(res => res.json())
             .then(data => {
                 this.nodes.actionStatusContainer.className = 'alert-item alert-info fade-in';
-                this.nodes.actionStatusText.innerHTML = `<strong>Execution Complete:</strong> ${data.message || commandTitle}`;
+                this.nodes.actionStatusText.innerHTML = `<strong>Execution Complete:</strong> ${data.message || actionType}`;
             })
             .catch(() => {
                 this.nodes.actionStatusContainer.className = 'alert-item alert-danger fade-in';
@@ -207,6 +329,31 @@ class AdminDashboard {
     attachGlobalActions() {
         // Expose dispatch to global scope for inline HTML event handlers
         window.simulateAction = this.dispatchProcedure.bind(this);
+
+        const searchInput = document.getElementById('globalSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+
+                // Filter complaints
+                if (this.nodes.complaintBody) {
+                    const rows = this.nodes.complaintBody.querySelectorAll('tr');
+                    rows.forEach(row => {
+                        row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+                    });
+                }
+
+                // Filter alerts
+                if (this.nodes.alertsContainer) {
+                    const alerts = this.nodes.alertsContainer.querySelectorAll('.alert-item');
+                    alerts.forEach(alert => {
+                        // ignore the emergency action alert items
+                        if (alert.id === 'actionStatus') return;
+                        alert.style.display = alert.textContent.toLowerCase().includes(term) ? '' : 'none';
+                    });
+                }
+            });
+        }
     }
 
     startDataLoops() {

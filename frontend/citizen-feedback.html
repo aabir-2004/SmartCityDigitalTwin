@@ -81,10 +81,10 @@
                 <span style="color: var(--accent-blue);">Smart</span>City
             </a>
             <div class="context-menu">
-                <a href="citizen.html" class="context-link active">
+                <a href="citizen.html" class="context-link">
                     <i data-lucide="file-edit" style="width: 18px; height: 18px;"></i> Submit Report
                 </a>
-                <a href="citizen-feedback.html" class="context-link">
+                <a href="citizen-feedback.html" class="context-link active">
                     <i data-lucide="file-text" style="width: 18px; height: 18px;"></i> My Feedback
                 </a>
                 <a href="citizen-preferences.html" class="context-link">
@@ -98,7 +98,7 @@
             <header class="top-header">
                 <div>
                     <div class="breadcrumb">Pages / Citizen Portal</div>
-                    <h1 class="page-title">Submit Feedback</h1>
+                    <h1 class="page-title">My Feedback Log</h1>
                 </div>
                 <div class="header-widgets">
                     <span style="cursor: pointer; display: flex; align-items: center; color: var(--text-secondary);">
@@ -110,48 +110,29 @@
                 </div>
             </header>
 
-            <div class="soft-card form-container delay-100">
-                <h2 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Report Issue</h2>
-                <p class="text-secondary" style="margin-bottom: 2rem;">
-                    Report city infrastructure issues or emergencies securely to the managerial dashboard.
-                </p>
-
-                <form id="complaintForm">
-
-                    <div class="form-group">
-                        <label class="form-label" for="category">Issue Category</label>
-                        <select id="category" name="category" class="form-control" required>
-                            <option value="" disabled selected>Select an issue category</option>
-                            <option value="Traffic">Traffic Congestion/Accident</option>
-                            <option value="Infrastructure">Faulty Infrastructure (e.g., Broken Light)</option>
-                            <option value="Emergency">Urgent Emergency (Medical/Fire)</option>
-                            <option value="Pollution">Air/Noise Pollution</option>
-                            <option value="General">General Service Request</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="location">Location (Zone / Street)</label>
-                        <input type="text" id="location" name="location" class="form-control" list="locationOptions"
-                            placeholder="e.g. Sector 4, MG Road" required>
-                        <datalist id="locationOptions"></datalist>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="description">Detailed Description</label>
-                        <textarea id="description" name="description" class="form-control"
-                            placeholder="Please describe the issue in detail..." required></textarea>
-                    </div>
-
-                    <div style="display: flex; gap: 1rem; align-items: center; justify-content: flex-end;">
-                        <button type="reset" class="btn btn-secondary">Clear</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <span>Submit Report</span>
-                        </button>
-                    </div>
-
-                    <div id="statusMessage" class="status-message"></div>
-                </form>
+            <div class="soft-card delay-100" style="margin-bottom: 2rem;">
+                <div class="card-header-bar">
+                    <span>Community Tracking</span>
+                    <span class="card-header-tag">Live Feed</span>
+                </div>
+                <h3 style="margin-bottom: 1rem; font-size: 1.25rem;">Submitted Reports</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Report ID</th>
+                                <th>Category</th>
+                                <th>Location</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Reported On</th>
+                            </tr>
+                        </thead>
+                        <tbody id="citizenFeedbackTableBody">
+                            <tr><td colspan="6" style="text-align:center; padding: 2rem; color: var(--text-secondary);">Loading your reports...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </main>
 
@@ -159,9 +140,60 @@
 
     <script>
         lucide.createIcons();
+        
+        // Fetch matching complaints from API dynamically
+        async function fetchMyFeedback() {
+            try {
+                const response = await fetch('/api/complaints');
+                if (!response.ok) return;
+
+                const complaints = await response.json();
+                const tbody = document.getElementById('citizenFeedbackTableBody');
+                
+                if (!complaints || complaints.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 2rem; color: var(--text-secondary);">You have not submitted any feedback yet.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                
+                // Show the 15 most recent for this example (in a real app, API handles pagination and user ID filtering)
+                complaints.slice(-15).reverse().forEach(complaint => {
+                    const row = document.createElement('tr');
+                    
+                    const cid = complaint.id || complaint.ComplaintID;
+                    const cat = complaint.category || complaint.Category;
+                    const loc = complaint.location || complaint.Location;
+                    const desc = complaint.description || complaint.Description;
+                    const status = complaint.status || complaint.Status;
+                    const timeRaw = complaint.time || complaint.Timestamp;
+                    
+                    let badgeClass = 'badge-open';
+                    if (status === 'In Progress') badgeClass = 'badge-progress';
+                    else if (status === 'Resolved') badgeClass = 'badge-resolved';
+
+                    const dateObj = new Date(timeRaw);
+                    const formattedDate = dateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) + ' ' + dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    row.innerHTML = `
+                        <td style="color:var(--accent-blue); font-weight:700;">#${String(cid).padStart(4, '0')}</td>
+                        <td>${cat}</td>
+                        <td>${loc}</td>
+                        <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${desc}">${desc}</td>
+                        <td><span class="badge ${badgeClass}">${status}</span></td>
+                        <td>${formattedDate}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+            } catch(e) {
+                console.warn('[Feedback] Could not load data.', e);
+                document.getElementById('citizenFeedbackTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 2rem; color: var(--status-danger);">Failed to load feedback. Try reloading.</td></tr>';
+            }
+        }
+        
+        fetchMyFeedback();
     </script>
-    <script src="js/data-sim.js"></script>
-    <script src="js/citizen.js"></script>
 </body>
 
 </html>

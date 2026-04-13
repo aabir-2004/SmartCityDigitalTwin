@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Panel | Smart City</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Chart Wrapper */
+        .chart-wrapper {
+            position: relative;
+            height: 250px;
+            width: 100%;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+
+        <!-- Primary Sidebar -->
+        <nav class="sidebar-primary">
+            <a href="index.html" class="sidebar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="width: 24px; height: 24px; border-radius: 4px; color: white; background: var(--accent-blue); padding: 2px;">
+                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                    <path d="M9 22v-4h6v4"></path>
+                    <path d="M8 6h.01"></path>
+                    <path d="M16 6h.01"></path>
+                    <path d="M12 6h.01"></path>
+                    <path d="M12 10h.01"></path>
+                    <path d="M12 14h.01"></path>
+                    <path d="M16 10h.01"></path>
+                    <path d="M16 14h.01"></path>
+                    <path d="M8 10h.01"></path>
+                    <path d="M8 14h.01"></path>
+                </svg>
+            </a>
+            <a href="admin.html" class="sidebar-icon active" title="Manager Panel"><i
+                    data-lucide="layout-dashboard"></i></a>
+            <a href="index.html" class="sidebar-icon" title="Sign Out" style="margin-top: auto;"><i
+                    data-lucide="log-out"></i></a>
+        </nav>
+
+        <!-- Contextual Sidebar -->
+        <aside class="sidebar-context">
+            <a href="index.html" class="context-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="width: 32px; height: 32px; border-radius: 8px; color: white; background: var(--accent-blue); padding: 4px;">
+                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                    <path d="M9 22v-4h6v4"></path>
+                    <path d="M8 6h.01"></path>
+                    <path d="M16 6h.01"></path>
+                    <path d="M12 6h.01"></path>
+                    <path d="M12 10h.01"></path>
+                    <path d="M12 14h.01"></path>
+                    <path d="M16 10h.01"></path>
+                    <path d="M16 14h.01"></path>
+                    <path d="M8 10h.01"></path>
+                    <path d="M8 14h.01"></path>
+                </svg>
+                <span style="color: var(--accent-blue);">Smart</span>City
+            </a>
+            <div class="context-menu">
+                <a href="admin.html" class="context-link">
+                    <i data-lucide="pie-chart" style="width: 18px; height: 18px;"></i> Dashboard
+                </a>
+                <a href="admin-alerts.html" class="context-link">
+                    <i data-lucide="alert-triangle" style="width: 18px; height: 18px;"></i> Live Alerts
+                </a>
+                <a href="admin-complaints.html" class="context-link active">
+                    <i data-lucide="clipboard-list" style="width: 18px; height: 18px;"></i> Complaints
+                </a>
+                <a href="admin-settings.html" class="context-link">
+                    <i data-lucide="settings" style="width: 18px; height: 18px;"></i> Settings
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <header class="top-header">
+                <div>
+                    <div class="breadcrumb">Pages / Manager Panel</div>
+                    <h1 class="page-title">Citizen Complaints</h1>
+                </div>
+                <div class="header-widgets">
+                    <div
+                        style="display: flex; align-items: center; gap: 0.5rem; background: #F4F7FE; border-radius: 20px; padding: 0.25rem 0.75rem;">
+                        <i data-lucide="search" style="width: 16px; height: 16px; color: var(--text-secondary);"></i>
+                        <input type="text" id="globalSearch" placeholder="Search data..."
+                            style="border: none; background: transparent; outline: none; font-family: var(--font-family); font-size: 0.875rem; color: var(--text-primary); width: 150px;">
+                    </div>
+                    <span style="cursor: pointer; display: flex; align-items: center; color: var(--text-secondary);">
+                        <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+                    </span>
+                    <div
+                        style="width: 35px; height: 35px; border-radius: 50%; background: var(--accent-blue); display: grid; place-items: center; color: white; font-weight: 700; font-size: 0.875rem;">
+                        AD</div>
+                </div>
+            </header>
+
+            <div class="dashboard-grid fade-in">
+
+                <!-- Citizens Complaints Table Layer -->
+                <div class="soft-card col-span-full delay-300" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem; font-size: 1.25rem;">Recent Citizen Reports</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Category</th>
+                                    <th>Location</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Time (Mock)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="complaintTableBody">
+                                <!-- Rendered by admin.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+    <script src="js/data-sim.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>

@@ -22,6 +22,22 @@ def add_complaint():
         )
     return jsonify({"success": True, "id": complaint_id}), 201
 
+@api_bp.route('/locations', methods=['GET'])
+def get_locations():
+    """Retrieve available city locations from sensor data for the admin panel."""
+    with get_db_connection() as conn:
+        try:
+            cursor = conn.execute("SELECT DISTINCT Location FROM SensorData WHERE Location IS NOT NULL")
+            locations = [row['Location'] for row in cursor.fetchall()]
+        except Exception:
+            locations = []
+            
+        if not locations:
+            # Fallback based on seed_db names
+            locations = ["Downtown Central Hub", "Sector 4 Industrial Park", "East Side Highway", "MG Road Intercept"]
+            
+    return jsonify(locations)
+
 @api_bp.route('/complaints', methods=['GET'])
 def get_complaints():
     """Retrieve all complaints for the administrative dashboard."""
@@ -74,25 +90,56 @@ def get_system_alerts():
 
 def _trigger_synthetic_anomaly():
     """Helper method to randomly inject an anomaly record for monitoring tests."""
-    alert_templates = [
-        {"type": "Traffic Congestion", "severity": "Warning", "desc": "Unusual congestion pattern matching peak-hour metrics."},
-        {"type": "Air Quality Degradation", "severity": "Critical", "desc": "PM2.5 metrics exceed threshold limits."},
-        {"type": "Grid Optimization", "severity": "Info", "desc": "Automated load balancing algorithm engaged."}
-    ]
-    choice = random.choice(alert_templates)
     alert_id = f"ALT-{random.randint(1000, 9999)}"
     timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
     
     with get_db_connection() as conn:
-        conn.execute(
-            "INSERT INTO Alerts (AlertID, AlertType, Severity, Description, Timestamp) VALUES (?, ?, ?, ?, ?)",
-            (alert_id, choice['type'], choice['severity'], choice['desc'], timestamp)
-        )
+        try:
+            cursor = conn.execute("SELECT DISTINCT Location FROM SensorData WHERE Location IS NOT NULL")
+            locations = [row['Location'] for row in cursor.fetchall()]
+        except Exception:
+            locations = []
+            
+        loc = random.choice(locations) if locations else "Unknown Sector"
+
+        alert_templates = [
+            {"type": "Traffic Congestion", "severity": "Warning", "desc": f"Unusual congestion pattern matching peak-hour metrics in {loc}."},
+            {"type": "Air Quality Degradation", "severity": "Critical", "desc": f"PM2.5 metrics exceed threshold limits in {loc}."},
+            {"type": "Grid Optimization", "severity": "Info", "desc": f"Automated load balancing algorithm engaged for {loc}."}
+        ]
+        choice = random.choice(alert_templates)
+        
+        try:
+            conn.execute(
+                "INSERT INTO Alerts (AlertID, AlertType, Severity, Description, Timestamp) VALUES (?, ?, ?, ?, ?)",
+                (alert_id, choice['type'], choice['severity'], choice['desc'], timestamp)
+            )
+        except Exception:
+            pass
 
 @api_bp.route('/actions/trigger', methods=['POST'])
 def trigger_action():
     """Execute a simulated administrative procedure."""
     data = request.get_json() or {}
-    action = data.get('action', 'Unspecified Reference Procedure')
-    processed_action = action.replace('ing', 'ed')
-    return jsonify({"success": True, "message": f"Procedure '{processed_action}' finalized."})
+    action_type = data.get('actionType', 'General Policy Update')
+    location = data.get('location', 'City-Wide')
+    
+    action_id = f"ACT-{random.randint(1000, 9999)}"
+    timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+    
+    # Process verb for display
+    display_action = action_type
+    
+    with get_db_connection() as conn:
+        try:
+            conn.execute(
+                "INSERT INTO AdminActions (ActionID, ActionType, TargetLocation, Result, Timestamp) VALUES (?, ?, ?, ?, ?)",
+                (action_id, action_type, location, "Success", timestamp)
+            )
+        except Exception:
+            pass
+            
+    return jsonify({
+        "success": True, 
+        "message": f"'{display_action}' successfully deployed to {location}."
+    })

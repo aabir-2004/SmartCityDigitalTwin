@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Leaflet Map Integration -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
         /* Custom Chart Wrapper */
         .chart-wrapper {
@@ -25,9 +30,23 @@
 
         <!-- Primary Sidebar -->
         <nav class="sidebar-primary">
-            <div class="user-profile-icon" title="Manager Profile">
-                <i data-lucide="user" style="width: 32px; height: 32px;"></i>
-            </div>
+            <a href="index.html" class="sidebar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="width: 24px; height: 24px; border-radius: 4px; color: white; background: var(--accent-blue); padding: 2px;">
+                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                    <path d="M9 22v-4h6v4"></path>
+                    <path d="M8 6h.01"></path>
+                    <path d="M16 6h.01"></path>
+                    <path d="M12 6h.01"></path>
+                    <path d="M12 10h.01"></path>
+                    <path d="M12 14h.01"></path>
+                    <path d="M16 10h.01"></path>
+                    <path d="M16 14h.01"></path>
+                    <path d="M8 10h.01"></path>
+                    <path d="M8 14h.01"></path>
+                </svg>
+            </a>
             <a href="admin.html" class="sidebar-icon active" title="Manager Panel"><i
                     data-lucide="layout-dashboard"></i></a>
             <a href="index.html" class="sidebar-icon" title="Sign Out" style="margin-top: auto;"><i
@@ -55,10 +74,10 @@
                 <span style="color: var(--accent-blue);">Smart</span>City
             </a>
             <div class="context-menu">
-                <a href="admin.html" class="context-link active">
+                <a href="admin.html" class="context-link">
                     <i data-lucide="pie-chart" style="width: 18px; height: 18px;"></i> Dashboard
                 </a>
-                <a href="admin-alerts.html" class="context-link">
+                <a href="admin-alerts.html" class="context-link active">
                     <i data-lucide="alert-triangle" style="width: 18px; height: 18px;"></i> Live Alerts
                 </a>
                 <a href="admin-complaints.html" class="context-link">
@@ -76,7 +95,7 @@
             <header class="top-header">
                 <div>
                     <div class="breadcrumb">Pages / Manager Panel</div>
-                    <h1 class="page-title">City Dashboard</h1>
+                    <h1 class="page-title">Live System Alerts</h1>
                 </div>
                 <div class="header-widgets">
                     <div
@@ -95,82 +114,24 @@
             </header>
 
             <div class="dashboard-grid fade-in">
-
-                <!-- Key Stats Layer -->
-                <div class="soft-card col-span-4 stat-card delay-100">
-                    <div class="card-header-bar">
-                        <span>Summary data</span>
-                        <span class="card-header-tag">Live</span>
-                    </div>
-                    <div class="stat-header">
-                        <span class="stat-title">Avg. Traffic Flow</span>
-                        <span class="stat-trend trend-down">
-                            <i data-lucide="trending-down" style="width: 14px; height: 14px; margin-right: 2px;"></i>
-                            12%
-                        </span>
-                    </div>
-                    <div class="stat-value">
-                        <span id="trafficVal">78</span><span class="stat-unit">Vehicles/min</span>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="trafficChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="soft-card col-span-4 stat-card delay-200">
-                    <div class="card-header-bar">
-                        <span>Summary data</span>
-                        <span class="card-header-tag">Live</span>
-                    </div>
-                    <div class="stat-header">
-                        <span class="stat-title">Air Quality Index</span>
-                        <span class="stat-trend trend-up">
-                            <i data-lucide="trending-up" style="width: 14px; height: 14px; margin-right: 2px;"></i> 5%
-                        </span>
-                    </div>
-                    <div class="stat-value">
-                        <span id="aqiVal">85</span><span class="stat-unit">Moderate</span>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="aqiChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="soft-card col-span-4 stat-card delay-300">
-                    <div class="card-header-bar">
-                        <span>Summary data</span>
-                        <span class="card-header-tag">Live</span>
-                    </div>
-                    <div class="stat-header">
-                        <span class="stat-title">Energy Consumption</span>
-                        <span class="stat-trend trend-up">
-                            <i data-lucide="trending-up" style="width: 14px; height: 14px; margin-right: 2px;"></i> 2%
-                        </span>
-                    </div>
-                    <div class="stat-value">
-                        <span id="energyVal">42.5</span><span class="stat-unit">MW</span>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="energyChart"></canvas>
-                    </div>
-                </div>
-
                 <!-- System Alerts -->
-                <div class="soft-card col-span-5 delay-100" style="height: 100%;">
-                    <div class="card-header-bar">
-                        <span>System Updates</span>
-                    </div>
-                    <h3 style="margin-bottom: 1rem; font-size: 1.25rem;">Live Alerts</h3>
-                    <div id="alertsContainer" style="max-height: 350px; overflow-y: auto; padding-right: 0.5rem;">
+                <div class="soft-card col-span-3 delay-100" style="height: calc(100vh - 200px);">
+                    <h3 style="margin-bottom: 1rem; font-size: 1.25rem;">Live Alerts Feed</h3>
+                    <div id="alertsContainer"
+                        style="height: calc(100% - 40px); overflow-y: auto; padding-right: 0.5rem;">
                         <!-- Alerts rendered by admin.js -->
                     </div>
                 </div>
 
+                <!-- GPS Map Simulation -->
+                <div class="soft-card col-span-6 delay-150"
+                    style="height: calc(100vh - 200px); display: flex; flex-direction: column;">
+                    <h3 style="margin-bottom: 1rem; font-size: 1.25rem;">City GPS Simulation</h3>
+                    <div id="cityMap" style="flex: 1; border-radius: 12px; z-index: 1; background: #eaeaea;"></div>
+                </div>
+
                 <!-- Emergency Response Actions -->
-                <div class="soft-card col-span-7 delay-200">
-                    <div class="card-header-bar">
-                        <span>Action Protocols</span>
-                    </div>
+                <div class="soft-card col-span-3 delay-200" style="height: calc(100vh - 200px); overflow-y: auto;">
                     <h3 style="margin-bottom: 0.5rem; font-size: 1.25rem;">Emergency Actions</h3>
                     <p class="text-secondary" style="font-size: 0.875rem; margin-bottom: 1.5rem;">
                         Trigger simulated system responses to address infrastructure alerts.
@@ -196,33 +157,6 @@
                         <span id="actionStatusText"></span>
                     </div>
                 </div>
-
-                <!-- Citizens Complaints Table Layer -->
-                <div class="soft-card col-span-full delay-300" style="margin-bottom: 2rem;">
-                    <div class="card-header-bar">
-                        <span>Citizen Network</span>
-                        <span class="card-header-tag">Public DB</span>
-                    </div>
-                    <h3 style="margin-bottom: 1rem; font-size: 1.25rem;">Recent Logs</h3>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Category</th>
-                                    <th>Location</th>
-                                    <th>Description</th>
-                                    <th>Status</th>
-                                    <th>Time (Mock)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="complaintTableBody">
-                                <!-- Rendered by admin.js -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
             </div>
         </main>
     </div>
