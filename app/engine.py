@@ -1,5 +1,6 @@
 import time
 import random
+from app.database import get_db_connection
 
 SYSTEM_STATE = {
     "traffic": 60.0,
@@ -40,6 +41,41 @@ def get_current_stats():
         "energyUsage": round(SYSTEM_STATE["energyUsage"], 1)
     }
 
+def trigger_synthetic_anomaly(socketio):
+    """Helper method to randomly inject an anomaly record and emit to clients."""
+    alert_id = f"ALT-{random.randint(1000, 9999)}"
+    timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+    
+    with get_db_connection() as conn:
+        try:
+            cursor = conn.execute("SELECT DISTINCT Location FROM SensorData WHERE Location IS NOT NULL")
+            locations = [row['Location'] for row in cursor.fetchall()]
+        except Exception:
+            locations = []
+            
+        loc = random.choice(locations) if locations else "Unknown Sector"
+
+        alert_templates = [
+            {"type": "Traffic Congestion", "severity": "Warning", "desc": f"Unusual congestion pattern matching peak-hour metrics in {loc}."},
+            {"type": "Air Quality Degradation", "severity": "Critical", "desc": f"PM2.5 metrics exceed threshold limits in {loc}."},
+            {"type": "Grid Optimization", "severity": "Info", "desc": f"Automated load balancing algorithm engaged for {loc}."}
+        ]
+        choice = random.choice(alert_templates)
+        
+        try:
+            conn.execute(
+                "INSERT INTO Alerts (AlertID, AlertType, Severity, Description, Timestamp) VALUES (?, ?, ?, ?, ?)",
+                (alert_id, choice['type'], choice['severity'], choice['desc'], timestamp)
+            )
+        except Exception:
+            pass
+    
+    # Broadcast Alert via WebSocket to map and dashboard
+    socketio.emit('new_alert', {
+        "id": alert_id, "type": choice['type'], 
+        "severity": choice['severity'], "desc": choice['desc']
+    })
+
 def run_simulation_loop(socketio):
     """
     Background Task: Continuous time-evolving deterministic simulation.
@@ -49,6 +85,10 @@ def run_simulation_loop(socketio):
     while True:
         socketio.sleep(2.5) # Non-blocking sleep for WebSocket async loop
         
+        # 15% chance per tick to generate an anomaly 
+        if random.random() < 0.15:
+            trigger_synthetic_anomaly(socketio)
+            
         # Traffic drift + noise
         noise_t = random.uniform(-1.0, 1.0)
         SYSTEM_STATE["traffic"] += SYSTEM_STATE["traffic_trend"] + noise_t

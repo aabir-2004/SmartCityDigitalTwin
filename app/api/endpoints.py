@@ -61,9 +61,7 @@ def get_dashboard_stats():
 
 @api_bp.route('/dashboard/alerts', methods=['GET'])
 def get_system_alerts():
-    """Retrieve up to 5 recent system alerts, with randomized anomaly triggers."""
-    if random.random() < 0.25:
-        _trigger_synthetic_anomaly()
+    """Retrieve up to 5 recent system alerts."""
 
     with get_db_connection() as conn:
         cursor = conn.execute(
@@ -73,40 +71,7 @@ def get_system_alerts():
         
     return jsonify([dict(row) for row in rows])
 
-def _trigger_synthetic_anomaly():
-    """Helper method to randomly inject an anomaly record for monitoring tests."""
-    alert_id = f"ALT-{random.randint(1000, 9999)}"
-    timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
-    
-    with get_db_connection() as conn:
-        try:
-            cursor = conn.execute("SELECT DISTINCT Location FROM SensorData WHERE Location IS NOT NULL")
-            locations = [row['Location'] for row in cursor.fetchall()]
-        except Exception:
-            locations = []
-            
-        loc = random.choice(locations) if locations else "Unknown Sector"
 
-        alert_templates = [
-            {"type": "Traffic Congestion", "severity": "Warning", "desc": f"Unusual congestion pattern matching peak-hour metrics in {loc}."},
-            {"type": "Air Quality Degradation", "severity": "Critical", "desc": f"PM2.5 metrics exceed threshold limits in {loc}."},
-            {"type": "Grid Optimization", "severity": "Info", "desc": f"Automated load balancing algorithm engaged for {loc}."}
-        ]
-        choice = random.choice(alert_templates)
-        
-        try:
-            conn.execute(
-                "INSERT INTO Alerts (AlertID, AlertType, Severity, Description, Timestamp) VALUES (?, ?, ?, ?, ?)",
-                (alert_id, choice['type'], choice['severity'], choice['desc'], timestamp)
-            )
-        except Exception:
-            pass
-    
-    # Broadcast Alert via WebSocket to bypass polling interval latency
-    socketio.emit('new_alert', {
-        "id": alert_id, "type": choice['type'], 
-        "severity": choice['severity'], "desc": choice['desc']
-    })
 
 @api_bp.route('/actions/trigger', methods=['POST'])
 def trigger_action():
