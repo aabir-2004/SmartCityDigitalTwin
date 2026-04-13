@@ -2,6 +2,8 @@ import random
 import time
 from flask import Blueprint, request, jsonify
 from app.database import get_db_connection
+from app import socketio
+from app.engine import apply_admin_action, get_current_stats
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -20,6 +22,9 @@ def add_complaint():
             "INSERT INTO Complaints (ComplaintID, Category, Location, Description, Status, Timestamp) VALUES (?, ?, ?, ?, ?, ?)",
             (complaint_id, data['category'], data['location'], data['description'], "Open", timestamp)
         )
+    
+    # WebSocket Event: Notify all clients immediately about the new complaint
+    socketio.emit('new_complaint', {"id": complaint_id})
     return jsonify({"success": True, "id": complaint_id}), 201
 
 @api_bp.route('/locations', methods=['GET'])
@@ -49,30 +54,10 @@ def get_complaints():
 
 @api_bp.route('/dashboard/stats', methods=['GET'])
 def get_dashboard_stats():
-    """Retrieve the latest real aggregated sensor readings."""
-    data = {}
-    with get_db_connection() as conn:
-        for s_type, default_val in [("TrafficFlow", 60), ("AirQuality", 40), ("EnergyLoad", 30)]:
-            try:
-                cursor = conn.execute(
-                    "SELECT Reading FROM SensorData WHERE SensorType = ? ORDER BY Timestamp DESC LIMIT 1", 
-                    (s_type,)
-                )
-                res = cursor.fetchone()
-                base_val = res[0] if res else default_val
-            except Exception:
-                # Fallback if SensorData table missing (not seeded yet)
-                base_val = default_val
-            
-            # Application of a realistic variance distribution
-            min_variance, max_variance = -base_val * 0.02, base_val * 0.02
-            data[s_type] = round(base_val + random.uniform(min_variance, max_variance), 1)
-
-    return jsonify({
-        "traffic": data["TrafficFlow"],
-        "airQuality": data["AirQuality"],
-        "energyUsage": data["EnergyLoad"]
-    })
+    """Retrieve the latest real aggregated sensor readings from the State Engine."""
+    # The stats are now pulled from the centralized, persistent state engine
+    # rather than applying random jitter instantly on GET requests.
+    return jsonify(get_current_stats())
 
 @api_bp.route('/dashboard/alerts', methods=['GET'])
 def get_system_alerts():
@@ -116,6 +101,12 @@ def _trigger_synthetic_anomaly():
             )
         except Exception:
             pass
+    
+    # Broadcast Alert via WebSocket to bypass polling interval latency
+    socketio.emit('new_alert', {
+        "id": alert_id, "type": choice['type'], 
+        "severity": choice['severity'], "desc": choice['desc']
+    })
 
 @api_bp.route('/actions/trigger', methods=['POST'])
 def trigger_action():
@@ -138,6 +129,9 @@ def trigger_action():
             )
         except Exception:
             pass
+            
+    # CAUSAL FEEDBACK LOOP: Mutate global state variables based on the Admin Action physically
+    apply_admin_action(action_type)
             
     return jsonify({
         "success": True, 

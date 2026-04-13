@@ -14,7 +14,8 @@ class AdminDashboard {
         this.initializeCharts();
         this.attachGlobalActions();
 
-        this.startDataLoops();
+        // WebSocket Integration for true real-time updates
+        this.setupWebSockets();
         this.fetchLocations();
     }
 
@@ -122,12 +123,8 @@ class AdminDashboard {
         return safeLandPoints[Math.abs(hash) % safeLandPoints.length];
     }
 
-    async syncTelemetry() {
+    processTelemetry(metrics) {
         try {
-            const resource = await fetch('/api/dashboard/stats');
-            if (!resource.ok) return;
-
-            const metrics = await resource.json();
 
             if (this.nodes.trafficVal) this.nodes.trafficVal.textContent = metrics.traffic;
             if (this.nodes.aqiVal) this.nodes.aqiVal.textContent = metrics.airQuality || metrics.aqi;
@@ -196,68 +193,78 @@ class AdminDashboard {
             const items = await req.json();
 
             items.reverse().forEach(evt => {
-                if (!this.alertRegistry.has(evt.id)) {
-                    this.alertRegistry.add(evt.id);
-
-                    let notificationClass = 'alert-info';
-                    let alertColorHex = '#3b82f6';
-
-                    if (evt.severity === 'Critical') {
-                        notificationClass = 'alert-critical';
-                        alertColorHex = '#ef4444';
-                    } else if (evt.severity === 'Warning') {
-                        notificationClass = 'alert-warning';
-                        alertColorHex = '#f59e0b';
-                    }
-
-                    // Map specific logic: Search description for a known location
-                    let matchedLoc = null;
-                    for (let loc of Object.keys(this.markers)) {
-                        if (evt.desc.includes(loc)) {
-                            matchedLoc = loc;
-                            break;
-                        }
-                    }
-
-                    if (this.map && matchedLoc && this.markers[matchedLoc]) {
-                        const marker = this.markers[matchedLoc];
-                        marker.setPopupContent(`<b>${matchedLoc}</b><br><span style="color:${alertColorHex}">${evt.severity}: ${evt.type}</span>`);
-
-                        // Create a ping visual effect
-                        const circle = L.circle(marker.getLatLng(), {
-                            color: alertColorHex,
-                            fillColor: alertColorHex,
-                            fillOpacity: 0.4,
-                            radius: 1200
-                        }).addTo(this.map);
-
-                        this.map.panTo(marker.getLatLng());
-
-                        // Remove ping circle after 5s
-                        setTimeout(() => {
-                            if (this.map) this.map.removeLayer(circle);
-                        }, 5000);
-                    }
-
-                    const alertBlock = document.createElement('div');
-                    alertBlock.className = `alert-item ${notificationClass} fade-in`;
-                    alertBlock.innerHTML = `
-                        <div class="alert-header">
-                            <span class="alert-title">${evt.severity} - ${evt.type}</span>
-                            <span class="alert-time">${new Date(evt.timestamp).toLocaleTimeString()}</span>
-                        </div>
-                        <div class="alert-desc">${evt.desc}</div>
-                    `;
-
-                    this.nodes.alertsContainer.prepend(alertBlock);
-
-                    if (this.nodes.alertsContainer.children.length > 5) {
-                        this.nodes.alertsContainer.lastElementChild.remove();
-                    }
-                }
+                this.handleIncomingAlert(evt);
             });
         } catch (err) {
             console.warn('[Alerts] Engine disconnected:', err);
+        }
+    }
+
+    handleIncomingAlert(evt) {
+        if (!this.nodes.alertsContainer) return;
+        
+        if (!this.alertRegistry.has(evt.id || evt.AlertID)) {
+            const id = evt.id || evt.AlertID;
+            this.alertRegistry.add(id);
+
+            let notificationClass = 'alert-info';
+            let alertColorHex = '#3b82f6';
+
+            if (evt.severity === 'Critical') {
+                notificationClass = 'alert-critical';
+                alertColorHex = '#ef4444';
+            } else if (evt.severity === 'Warning') {
+                notificationClass = 'alert-warning';
+                alertColorHex = '#f59e0b';
+            }
+
+            // Map specific logic: Search description for a known location
+            let matchedLoc = null;
+            for (let loc of Object.keys(this.markers)) {
+                if (evt.desc.includes(loc)) {
+                    matchedLoc = loc;
+                    break;
+                }
+            }
+
+            if (this.map && matchedLoc && this.markers[matchedLoc]) {
+                const marker = this.markers[matchedLoc];
+                marker.setPopupContent(`<b>${matchedLoc}</b><br><span style="color:${alertColorHex}">${evt.severity}: ${evt.type}</span>`);
+
+                // Create a ping visual effect
+                const circle = L.circle(marker.getLatLng(), {
+                    color: alertColorHex,
+                    fillColor: alertColorHex,
+                    fillOpacity: 0.4,
+                    radius: 1200
+                }).addTo(this.map);
+
+                this.map.panTo(marker.getLatLng());
+
+                // Remove ping circle after 5s
+                setTimeout(() => {
+                    if (this.map) this.map.removeLayer(circle);
+                }, 5000);
+            }
+
+            const alertBlock = document.createElement('div');
+            alertBlock.className = `alert-item ${notificationClass} fade-in`;
+            // Ensure timestamp exists, or fallback to current time
+            const timeObj = evt.timestamp ? new Date(evt.timestamp) : new Date();
+            
+            alertBlock.innerHTML = `
+                <div class="alert-header">
+                    <span class="alert-title">${evt.severity} - ${evt.type}</span>
+                    <span class="alert-time">${timeObj.toLocaleTimeString()}</span>
+                </div>
+                <div class="alert-desc">${evt.desc}</div>
+            `;
+
+            this.nodes.alertsContainer.prepend(alertBlock);
+
+            if (this.nodes.alertsContainer.children.length > 5) {
+                this.nodes.alertsContainer.lastElementChild.remove();
+            }
         }
     }
 
@@ -356,16 +363,28 @@ class AdminDashboard {
         }
     }
 
-    startDataLoops() {
-        setInterval(() => this.syncTelemetry(), this.pollRates.stats);
+    setupWebSockets() {
+        // Initialize WebSocket connection to identical origin
+        const socket = io();
 
+        // Bind incoming websocket events
+        socket.on('stats_update', (metrics) => {
+            this.processTelemetry(metrics);
+        });
+
+        socket.on('new_complaint', () => {
+            if (this.nodes.complaintBody) this.fetchAdminComplaints();
+        });
+
+        socket.on('new_alert', (evt) => {
+            this.handleIncomingAlert(evt);
+        });
+
+        // Initialize historical seed data over standards REST before WS takes over
         if (this.nodes.complaintBody) {
-            setInterval(() => this.fetchAdminComplaints(), this.pollRates.complaints);
             this.fetchAdminComplaints();
         }
-
         if (this.nodes.alertsContainer) {
-            setInterval(() => this.pollSystemAlerts(), this.pollRates.alerts);
             this.pollSystemAlerts();
         }
     }

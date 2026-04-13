@@ -1,9 +1,12 @@
 import os
 from flask import Flask
+from flask_socketio import SocketIO
+
+# Global Socket.IO instance attached to the eventlet/werkzeug WSGI
+socketio = SocketIO(cors_allowed_origins="*")
 
 def create_app() -> Flask:
     """Factory method to construct the Flask application module."""
-    # Configure the frontend path relative to this module
     static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend'))
     app = Flask(__name__, static_folder=static_dir)
     
@@ -13,7 +16,10 @@ def create_app() -> Flask:
     except Exception as e:
         app.logger.warning(f"Deferred database provisioning: {e}")
 
-    # Register modular components
+    # Initialize SocketIO onto the application instance
+    socketio.init_app(app)
+
+    # Register modular REST components
     from app.api.endpoints import api_bp
     app.register_blueprint(api_bp)
 
@@ -24,5 +30,9 @@ def create_app() -> Flask:
     @app.route('/<path:filename>')
     def serve_static(filename):
         return app.send_static_file(filename)
+
+    # Start the continuous Time-Evolving Simulation Engine as a background task
+    from app.engine import run_simulation_loop
+    socketio.start_background_task(run_simulation_loop, socketio)
 
     return app
