@@ -1,60 +1,97 @@
-# Smart City Digital Twin 🏙️
+# Smart City Digital Twin
 
-Welcome to the **Smart City Digital Twin** project—a centralized, real-time smart city management ecosystem. This platform bridges the gap between civic administration and citizen engagement, utilizing historical datasets to simulate live IoT infrastructure metrics.
+Smart City Digital Twin is a comprehensive system for real-time urban infrastructure monitoring and citizen feedback management. It integrates citizen-reported data with historical sensor metrics to provide a centralized governance dashboard for city administrators.
 
-## 🚀 Key Features
-
-* **Citizen Portal:** A sleek, user-friendly interface where citizens can report infrastructure complaints and submit emergent urban alerts.
-* **Manager Governance Dashboard:** A real-time command center for administrators featuring interactive data visualizations (`Chart.js`), live polling of citizen feedback, and IoT sensor anomaly detection.
-* **Realistic Data Engine:** Powered by authentic historical data feeds (Kaggle/OpenData) covering Air Quality (PM2.5), US Energy Loads, and Traffic hub logic. A live "micro-variance jitter" algorithm perfectly emulates real hardware sensor fluctuations.
-* **Automated Setup:** Includes a seamless `run.sh` script that automatically handles environment setup, clears occupied ports, and launches the application.
-
-## 🛠️ Technology Stack
-
-* **Frontend:** Pure Vanilla HTML5, CSS3, ES6 JavaScript ("Soft UI" / Premium Flat Design).
-* **Backend:** Python + Flask REST API.
-* **Database:** SQLite3 (`smartcity.db`).
-* **Data Processing:** Python `pandas` for data ingestion and synthesis.
-* **Visualization Themes:** Chart.js + Lucide SVGs.
-
-## 🚦 Getting Started
-
-### Prerequisites
-* **Python 3.x** installed.
-* A UNIX-like terminal (macOS/Linux) to run the startup script.
-
-### Installation & Execution
-
-We have provided a streamlined bash script to start the project with a single command. 
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/aabir-2004/SmartCityDigitalTwin.git
-   cd SmartCityDigitalTwin
-   ```
-
-2. **Run the Initialization Script:**
-   ```bash
-   ./run.sh
-   ```
-   
-   **What this script does:**
-   * Checks for and safely terminates any stale processes already running on Port `8080`.
-   * Activates the local Python virtual environment (`venv`).
-   * Starts the actual Flask backend server.
-   * Automatically opens the platform dynamically in your default web browser at `http://127.0.0.1:8080`.
-
-## 📂 Project Structure
-
-* `/app/` - The core standalone Flask API, handling SQLite relational queries, and routing logic (`database.py`, `api/endpoints.py`).
-* `/frontend/` - Contains all HTML routing interfaces (`index.html`, `citizen.html`, `admin.html`), CSS styling, and client-side JavaScript architecture.
-* `/scripts/` - Database population engines (`seed_db.py`) cleaning and mapping historic data directly into SQL tables.
-* `/DATASETS/` - Authentic `.csv` data representing Air Quality limits, regional Traffic, and macro-Energy consumption.
-
-## 🔮 Future Roadmap
-* **Full Duplex WebSockets:** Migrating from standard interval polling on the frontend to active `Socket.io` connections for true push-based latency reduction.
-* **Predictive ML AI Modeling:** Integrating `scikit-learn` algorithms on historical sensor data to proactively predict traffic deadlocks and grid outages.
-* **Hardware Integration:** Hooking up physical IoT micro-controllers (e.g., a Raspberry Pi) publishing metrics via an MQTT Broker to override the dataset simulation in real-time.
+The system is designed to simulate authentic IoT environments by utilizing real-world datasets rather than arbitrary mathematically generated logic. It enforces a strict boundary between public reporting and administrative action, ensuring clean, verifiable data layers across the platform.
 
 ---
-*Built for the future of urban analytics and systemic city infrastructure optimization.*
+
+## System Overview
+
+At a high level, the pipeline ingests public infrastructural complaints and historical environment data, processes them through a unified backend, and dynamically renders actionable insights on a real-time command dashboard.
+
+Citizen Feedback & OpenData → Flask REST Backend  
+→ Relational Persistence (SQLite) → Asynchronous Polling  
+→ Data Visualization (Chart.js) → Manager Action  
+
+The public datasets serve as simulated sensor readings. All subsequent routing handles these data points identically to live IoT hardware polling.
+
+---
+
+## Design Principles
+
+The system is built around a few core constraints:
+
+- All visual dashboard metrics are grounded strictly in the database state, eliminating arbitrary frontend mock data.  
+- Simulated hardware variance is algorithmically applied to historical data to reproduce authentic sensor fluctuations.  
+- Interactions are entirely decoupled; the Citizen module and the Manager panel operate in strict isolation via REST endpoints.  
+- The frontend architecture eschews heavy frameworks in favor of high-performance Vanilla JS and "Soft UI" aesthetics.  
+
+This ensures that the environment operates efficiently, reliably, and can easily transition to physical hardware integration (e.g., Raspberry Pi/MQTT) without core logic rewrites.
+
+---
+
+## Architecture
+
+The backend is implemented using a monolithic Python Flask API that handles all data processing, logical state changes, and simulated hardware data synthesis. 
+
+The frontend is built with pure HTML5, CSS3, and ES6 JavaScript, providing controlled interfaces for dataset visualization and civil reporting. 
+
+A local embedded SQLite layer is used for instantaneous data persistence and retrieval, reducing overhead and maximizing local deployment reliability.
+
+---
+
+## Pipeline Description
+
+### Data Ingestion
+
+Historic, real-world datasets encompassing US Energy Loads, Air Quality (PM2.5), and Traffic arrays are ingested via server-side pipelines (`seed_db.py`). The data is cleaned and optimally formatted for fast querying.
+
+### Citizen Reporting Logic
+
+The Citizen portal provides isolated structural submission boundaries. Feedback is structured as `JSON` and POSTed securely to the backend. No structural or schema-based changes are permitted from the client interface layer.
+
+### Visualization & Variance Engine
+
+The Manager dashboard pulls metric distributions via asynchronous fetches. A custom "micro-variance jitter" algorithm applies algorithmic noise over standard historical data, perfectly emulating the live drift of hardware sensors inside the `Chart.js` rendering cycle.
+
+### Management & Control
+
+A dedicated polling loop updates the Administrator dashboard dynamically. Administrative override actions (such as acknowledging or resolving a city alert) alter state records mathematically, allowing the system to reflect changes in real-time.
+
+---
+
+## Infrastructure and Reliability
+
+Process integrity is enforced automatically across all layers:
+
+- Dedicated virtual environments maintain dependency chains.  
+- The backend application binds strictly to port `8080`, deliberately evading default macOS AirPlay conflicts.  
+- Invalid or malformed POST requests from the Citizen interface are filtered before execution.  
+
+This ensures identical deployment states across multiple operating systems.
+
+---
+
+## Deployment
+
+The system leverages a localized deployment orchestrator (`run.sh`) to automate the environment.
+
+Execution flow automatically processes:
+- Port scanning and old daemon termination
+- Virtual environment activation
+- Server application logic bootstrap
+- Dynamic web browser attachment
+
+Run the system instantaneously via:
+```bash
+./run.sh
+```
+
+---
+
+## License
+
+All rights reserved.
+
+Unauthorized copying, modification, distribution, or use of this software, in whole or in part, is strictly prohibited without prior written permission from the author.
