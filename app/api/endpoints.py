@@ -96,9 +96,40 @@ def trigger_action():
             pass
             
     # CAUSAL FEEDBACK LOOP: Mutate global state variables based on the Admin Action physically
-    apply_admin_action(action_type)
+    feedback_message = apply_admin_action(action_type, location)
             
     return jsonify({
         "success": True, 
-        "message": f"'{display_action}' successfully deployed to {location}."
+        "message": feedback_message if feedback_message else f"'{display_action}' successfully deployed to {location}."
     })
+
+CRISIS_MODE = False
+
+@api_bp.route('/crisis_mode', methods=['GET', 'POST'])
+def manage_crisis_mode():
+    global CRISIS_MODE
+    if request.method == 'POST':
+        data = request.get_json() or {}
+        CRISIS_MODE = bool(data.get('active', False))
+        
+        # Audit Log
+        with get_db_connection() as conn:
+            try:
+                action_id = f"ACT-{random.randint(1000, 9999)}"
+                timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+                conn.execute(
+                    "INSERT INTO AdminActions (ActionID, ActionType, TargetLocation, Result, Timestamp) VALUES (?, ?, ?, ?, ?)",
+                    (action_id, f"Crisis Mode {'Activated' if CRISIS_MODE else 'Deactivated'}", "Global", "Success", timestamp)
+                )
+            except Exception:
+                pass
+                
+        # Broadcast to all clients
+        socketio.emit('crisis_mode_update', {"active": CRISIS_MODE})
+    return jsonify({"active": CRISIS_MODE})
+
+@api_bp.route('/resources', methods=['GET'])
+def get_resources():
+    """Returns dynamic geo-tagged resource data for heatmap."""
+    from app.engine import DEPLOYED_RESOURCES
+    return jsonify(DEPLOYED_RESOURCES)

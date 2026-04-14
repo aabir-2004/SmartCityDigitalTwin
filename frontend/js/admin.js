@@ -7,6 +7,7 @@ class AdminDashboard {
         };
         this.chartInstances = {};
         this.alertRegistry = new Set();
+        this.complaintRegistry = new Set();
         this.markers = {};
 
         this.domReferences();
@@ -152,30 +153,60 @@ class AdminDashboard {
     }
 
     async fetchAdminComplaints() {
-        if (!this.nodes.complaintBody) return;
-
         try {
             const req = await fetch('/api/complaints');
             if (!req.ok) return;
 
             const logs = await req.json();
 
-            // Rebuild table DOM
-            this.nodes.complaintBody.innerHTML = '';
+            // Rebuild table DOM if present
+            if (this.nodes.complaintBody) {
+                this.nodes.complaintBody.innerHTML = '';
+            }
 
             logs.forEach(record => {
-                const row = document.createElement('tr');
-                const badgeState = record.status === 'Open' ? 'badge-open' : 'badge-progress';
+                // Map visualization logic
+                if (!this.complaintRegistry.has(record.ComplaintID || record.id)) {
+                    this.complaintRegistry.add(record.ComplaintID || record.id);
+                    
+                    if (this.map) {
+                        let loc = record.location || record.Location;
+                        if (this.markers[loc]) {
+                            const marker = this.markers[loc];
+                            const popupContent = `<b>${loc}</b><br><span style="color:#8b5cf6;">Recent Complaint: ${record.category || record.Category}</span>`;
+                            marker.setPopupContent(popupContent);
 
-                row.innerHTML = `
-                    <td><strong>${record.id || record.ComplaintID}</strong></td>
-                    <td>${record.category || record.Category}</td>
-                    <td>${record.location || record.Location}</td>
-                    <td>${record.description || record.Description}</td>
-                    <td><span class="badge ${badgeState}">${record.status || record.Status}</span></td>
-                    <td>${new Date(record.timestamp || record.Timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
-                `;
-                this.nodes.complaintBody.appendChild(row);
+                            // Create a subtle ping
+                            const alertColorHex = '#8b5cf6'; // purple
+                            const circle = L.circle(marker.getLatLng(), {
+                                color: alertColorHex,
+                                fillColor: alertColorHex,
+                                fillOpacity: 0.4,
+                                radius: 800
+                            }).addTo(this.map);
+
+                            setTimeout(() => {
+                                if (this.map) this.map.removeLayer(circle);
+                            }, 5000);
+                        }
+                    }
+                }
+
+                // Table rendering logic
+                if (this.nodes.complaintBody) {
+                    const row = document.createElement('tr');
+                    const badgeState = record.status === 'Open' ? 'badge-open' : 'badge-progress';
+
+                    row.innerHTML = `
+                        <td><strong>${record.id || record.ComplaintID}</strong></td>
+                        <td>${record.category || record.Category}</td>
+                        <td>${record.location || record.Location}</td>
+                        <td>${record.description || record.Description}</td>
+                        <td><span class="badge ${badgeState}">${record.status || record.Status}</span></td>
+                        <td>${new Date(record.timestamp || record.Timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                    `;
+                    this.nodes.complaintBody.appendChild(row);
+                }
             });
 
         } catch (err) {
@@ -210,7 +241,27 @@ class AdminDashboard {
             let notificationClass = 'alert-info';
             let alertColorHex = '#3b82f6';
 
-            if (evt.severity === 'Critical') {
+            if (evt.severity === 'Extreme') {
+                notificationClass = 'alert-critical';
+                alertColorHex = '#b91c1c';
+                
+                // Show pinned banner for Extreme Alerts
+                if (!document.getElementById('extremeAlertBanner')) {
+                    const banner = document.createElement('div');
+                    banner.id = 'extremeAlertBanner';
+                    banner.className = 'extreme-alert-banner';
+                    banner.innerHTML = `
+                        <div>
+                            <span style="font-size: 1.25rem; margin-right: 15px;">⚠️ EXTREME ALERT</span>
+                            ${evt.desc}
+                        </div>
+                        <button class="btn btn-secondary" onclick="window.dashboardController.toggleCrisisMode(true)" style="background: rgba(255,255,255,0.2); border: 1px solid white;">
+                            ENABLE CRISIS MODE
+                        </button>
+                    `;
+                    document.body.prepend(banner);
+                }
+            } else if (evt.severity === 'Critical') {
                 notificationClass = 'alert-critical';
                 alertColorHex = '#ef4444';
             } else if (evt.severity === 'Warning') {
@@ -333,6 +384,74 @@ class AdminDashboard {
             });
     }
 
+    toggleCrisisMode(active = null) {
+        let isPresent = document.body.classList.contains('crisis-mode');
+        let newActive = active !== null ? active : !isPresent;
+        fetch('/api/crisis_mode', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({active: newActive})
+        });
+        
+        // Remove banner if deactivating via global logic
+        let banner = document.getElementById('extremeAlertBanner');
+        if (!newActive && banner) banner.remove();
+        
+        let crisisCtls = document.getElementById('crisisAdditionalControls');
+        if (crisisCtls) crisisCtls.style.display = newActive ? 'flex' : 'none';
+    }
+
+    async loadHeatmap(filterType = "all") {
+        if (!this.map || typeof L.heatLayer === 'undefined') return;
+
+        try {
+            const req = await fetch('/api/resources');
+            if (!req.ok) return;
+            const resources = await req.json();
+
+            // Format for Leaflet heat [lat, lng, intensity]
+            let heatPoints = resources
+                .filter(r => filterType === "all" || r.type === filterType)
+                .map(r => [r.lat, r.lng, r.intensity]);
+
+            if (this.heatLayer) {
+                this.map.removeLayer(this.heatLayer);
+            }
+
+            this.heatLayer = L.heatLayer(heatPoints, {
+                radius: 25,
+                blur: 15,
+                maxZoom: 14,
+                gradient: {
+                    0.2: 'blue',
+                    0.4: 'cyan',
+                    0.6: 'lime',
+                    0.8: 'yellow',
+                    1.0: 'red'
+                }
+            }).addTo(this.map);
+            this.heatmapActive = true;
+        } catch (err) {
+            console.warn('[Heatmap] Error loading resources:', err);
+        }
+    }
+
+    toggleHeatmap() {
+        if (!this.map) return;
+        if (!this.heatLayer) {
+            this.loadHeatmap(document.getElementById('heatmapFilter')?.value || 'all');
+            return;
+        }
+        
+        if (this.heatmapActive) {
+            this.map.removeLayer(this.heatLayer);
+            this.heatmapActive = false;
+        } else {
+            this.heatLayer.addTo(this.map);
+            this.heatmapActive = true;
+        }
+    }
+
     attachGlobalActions() {
         // Expose dispatch to global scope for inline HTML event handlers
         window.simulateAction = this.dispatchProcedure.bind(this);
@@ -373,17 +492,45 @@ class AdminDashboard {
         });
 
         socket.on('new_complaint', () => {
-            if (this.nodes.complaintBody) this.fetchAdminComplaints();
+            this.fetchAdminComplaints();
         });
 
         socket.on('new_alert', (evt) => {
             this.handleIncomingAlert(evt);
         });
 
+        socket.on('heatmap_refresh_required', () => {
+            if (this.heatmapActive) {
+                this.loadHeatmap(document.getElementById('heatmapFilter')?.value || 'all');
+            }
+        });
+
+        socket.on('crisis_mode_update', (data) => {
+            let crisisCtls = document.getElementById('crisisAdditionalControls');
+            if (data.active) {
+                document.body.classList.add('crisis-mode');
+                if(crisisCtls) crisisCtls.style.display = 'flex';
+            } else {
+                document.body.classList.remove('crisis-mode');
+                if(crisisCtls) crisisCtls.style.display = 'none';
+            }
+        });
+
+        // Initialize state syncing
+        fetch('/api/crisis_mode')
+            .then(r => r.json())
+            .then(data => {
+                if (data.active) {
+                    document.body.classList.add('crisis-mode');
+                    let crisisCtls = document.getElementById('crisisAdditionalControls');
+                    if(crisisCtls) crisisCtls.style.display = 'flex';
+                }
+            })
+            .catch(()=>null);
+
         // Initialize historical seed data over standards REST before WS takes over
-        if (this.nodes.complaintBody) {
-            this.fetchAdminComplaints();
-        }
+        this.fetchAdminComplaints();
+        
         if (this.nodes.alertsContainer) {
             this.pollSystemAlerts();
         }
