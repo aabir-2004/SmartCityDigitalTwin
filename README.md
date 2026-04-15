@@ -11,8 +11,6 @@ The system is a deterministic, **Monolithic Client-Server Architecture** utilizi
 
 <img width="1536" height="1024" alt="Architecture" src="https://github.com/user-attachments/assets/d682eb09-6b8e-4e46-9de2-e20716d3bee3" />
 
-
-
 - **Frontend:** Pure HTML5/CSS3 and Vanilla ES6 JavaScript ("Soft UI" / Flat Design). It is explicitly broken apart into Citizen logic and Administrator logic.
 - **Backend Core:** `Flask` forms the routing backbone, mapping JSON endpoints. 
 - **Persistency Layer:** `SQLite3` via standard `sqlite3` driver. 
